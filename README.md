@@ -5,9 +5,10 @@ A FastAPI + Jinja V1 for the full operational lifecycle of laboratory, IT, offic
 ## Quick start (Windows)
 
 1. Start **MySQL** from the XAMPP Control Panel.
-2. Copy `.env.example` to `.env` if `.env` is missing. Update the MySQL username/password in `DATABASE_URL` when required.
-3. Double-click `setup.bat` once, then use `start.bat` whenever you want to run the project.
-4. Open http://localhost:8000. API documentation is at http://localhost:8000/docs.
+2. Run `py app.py` from the project folder. On the first run it creates `.env` and `.venv`, installs dependencies, and applies database migrations automatically.
+3. Open https://labmate.bhasinpathlabs.com:4674. API documentation is at https://labmate.bhasinpathlabs.com:4674/docs.
+
+HTTPS uses `certs/fullchain.pem` and `certs/privkey.pem`. Certificate files are intentionally excluded from Git and must be installed separately on each server.
 
 The application uses its local `asset_management.users` table. Its schema and initial data were copied from `hiccup_ticket.users`; no runtime Hiccup database connection is required. Active users select their name from login suggestions and use their DOB as a `DDMMYYYY` password (for example, `10/04/2003` becomes `10042003`). DOB authentication is temporary and should be replaced before any shared deployment.
 
@@ -15,7 +16,7 @@ The application has four roles only: `Administrator`, `Asset Manager`, `Technici
 
 ## Database and migrations
 
-Database migrations live in `backend/alembic/versions`. `setup.bat` applies them with Alembic. The application uses the MySQL/MariaDB connection configured in `.env`.
+Database migrations live in `backend/alembic/versions`. The first `py app.py` run applies them with Alembic. The application uses the MySQL/MariaDB connection configured in `.env`.
 
 On application startup, a configured MySQL/MariaDB database is created automatically when it does not exist, followed by any missing tables. The configured database user must have `CREATE DATABASE` permission. Existing databases and data are never dropped.
 
@@ -57,6 +58,5 @@ backend/
   uploads/             User-uploaded documents
 .vscode/               Project formatter settings
 .env                    Local environment settings
-setup.bat               One-time environment setup
-start.bat               Application launcher
+app.py                  Single setup and application launcher
 ```

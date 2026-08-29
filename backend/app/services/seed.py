@@ -39,14 +39,36 @@ def seed(db: Session):
         if gk_site:
             gk_site.name = "GK-1"
             gk_site.is_active = True
-        elif not by_key.get("GK1"):
-            db.add(Site(name="GK-1"))
+        else:
+            gk_site = Site(name="GK-1")
+            db.add(gk_site)
         gurgaon_site = by_key.get("GURGAON")
         if gurgaon_site:
             gurgaon_site.name = "Gurgaon"
             gurgaon_site.is_active = True
         else:
-            db.add(Site(name="Gurgaon"))
+            gurgaon_site = Site(name="Gurgaon")
+            db.add(gurgaon_site)
+        db.flush()
+        floor_names = [
+            "Basement",
+            "Ground Floor",
+            "First Floor",
+            "Second Floor",
+            "Third Floor",
+        ]
+        for site in [gk_site, gurgaon_site]:
+            existing_floor_names = {
+                floor.name.casefold()
+                for floor in db.scalars(
+                    select(Floor).where(Floor.site_id == site.id)
+                ).all()
+            }
+            db.add_all(
+                Floor(name=name, site_id=site.id)
+                for name in floor_names
+                if name.casefold() not in existing_floor_names
+            )
         db.commit()
         return
 
@@ -72,6 +94,18 @@ def seed(db: Session):
     ]
     db.add_all(cats + makes + sites + depts)
     db.flush()
+    floor_names = [
+        "Basement",
+        "Ground Floor",
+        "First Floor",
+        "Second Floor",
+        "Third Floor",
+    ]
+    db.add_all(
+        Floor(name=floor_name, site_id=site.id)
+        for site in sites
+        for floor_name in floor_names
+    )
     types = []
     for cat, names in zip(
         cats,

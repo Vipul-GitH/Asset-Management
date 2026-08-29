@@ -460,60 +460,6 @@ function copyAsset(source) {
     source.asset_code,
   );
 }
-function assetForm(a = {}, copySource = '') {
-  const m = state.masters,
-    edit = Boolean(a.id);
-  modal(
-    edit
-      ? `Edit ${a.asset_code}`
-      : copySource
-        ? `Copy ${copySource}`
-        : 'Register asset',
-    `<form class="formgrid">${copySource ? `<p class="wide copy-notice"><b>Creating a new asset from ${esc(copySource)}</b><br>A new asset code and QR will be generated. Enter a new serial number and attach this asset's own documents.</p>` : ''}<h3 class="wide">Identity</h3><label>Asset name<input name="asset_name" value="${esc(a.asset_name || '')}" required></label><label>Category<select name="category_id" required>${optionsSelected(m.categories, a.category_id)}</select></label><label>Asset type<select name="asset_type_id" required>${optionsSelected(m.types, a.asset_type_id)}</select></label><label>Make<select name="make_id">${optionsSelected(m.makes, a.make_id)}</select></label><label>Model<input name="model_text" value="${esc(a.model || '')}"></label><label>Serial number<input name="serial_number" value="${esc(a.serial_number || '')}" ${copySource ? 'autofocus' : ''}></label><label>Criticality<select name="criticality">${['C1', 'C2', 'C3'].map((x) => `<option ${x === (a.criticality || 'C3') ? 'selected' : ''}>${x}</option>`).join('')}</select></label><h3 class="wide">Placement and responsibility</h3><label>Site<select name="current_site_id" required>${optionsSelected(m.sites, a.site_id)}</select></label><label>Floor<select name="current_floor_id">${optionsSelected(m.floors, a.floor_id)}</select></label><label>Department<select name="current_department_id">${optionsSelected(m.departments, a.department_id)}</select></label><label>Workstation<select name="current_workstation_id">${optionsSelected(m.workstations, a.workstation_id)}</select></label><label>Staff in-charge<select name="staff_incharge_employee_id" required>${optionsSelected(m.employees, a.staff_incharge_employee_id)}</select></label><label>Issued to<select name="issued_to_employee_id">${optionsSelected(m.employees, a.issued_to_employee_id, 'Not issued')}</select></label><label>Primary service contact<select name="primary_service_contact_id" required>${optionsSelected(m.contacts, a.primary_service_contact_id)}</select></label><label class="wide">Additional service contacts<select name="service_contact_ids" multiple>${m.contacts.map((x) => `<option value="${x.id}" ${(a.service_contacts || []).some((c) => c.id === x.id) ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label><h3 class="wide">Purchase and maintenance</h3><label>Holding class<select name="holding_class">${['', 'COMPANY_OWNED', 'CONTRACT_LEASED', 'VENDOR_HOSTED', 'TEMPORARY_DEMO_LOANER'].map((x) => `<option value="${x}" ${x === (a.holding_class || '') ? 'selected' : ''}>${x || 'Not specified'}</option>`).join('')}</select></label><label>Purchase date<input type="date" name="purchase_date" value="${esc(a.purchase_date || '')}"></label><label>Purchase value<input type="number" step="0.01" name="purchase_value" value="${esc(a.purchase_value || '')}"></label><label>Invoice reference<input name="invoice_reference" value="${esc(a.invoice_reference || '')}"></label><label>Warranty start<input type="date" name="warranty_start_date" value="${esc(a.warranty_start_date || '')}"></label><label>Warranty end<input type="date" name="warranty_end_date" value="${esc(a.warranty_end || '')}"></label><label>Useful life (months)<input type="number" min="1" name="useful_life_months" value="${esc(a.useful_life_months || '')}"></label><label>Calibration requirement<select name="calibration_mode"><option value="NOT_REQUIRED">Non Required</option><option value="REQUIRED" ${a.calibration_mode === 'REQUIRED' ? 'selected' : ''}>Required</option></select></label><h3 class="wide">Documents and media</h3><label>Primary asset photo<input type="file" name="primary_photo" accept=".png,.jpg,.jpeg,.webp"><small>${a.photo_url ? 'Current photo will be kept unless replaced.' : 'PNG, JPG or WEBP'}</small></label><label>Warranty document<input type="file" name="warranty_document" accept=".pdf,.png,.jpg,.jpeg,.webp"><small>${a.warranty_document_path ? 'Current document will be kept unless replaced.' : 'PDF or image file'}</small></label><label><input type="checkbox" name="pm_required" ${a.pm_required ? 'checked' : ''}> PM required</label><div class="actions wide"><button>${edit ? 'Save changes' : copySource ? 'Create copied asset' : 'Register asset'}</button></div></form>`,
-    async (f) => {
-      const fd = new FormData(f),
-        d = formData(f);
-      [
-        'category_id',
-        'asset_type_id',
-        'make_id',
-        'current_site_id',
-        'current_floor_id',
-        'current_department_id',
-        'current_workstation_id',
-        'staff_incharge_employee_id',
-        'issued_to_employee_id',
-        'primary_service_contact_id',
-        'useful_life_months',
-      ].forEach((k) => (d[k] = d[k] ? Number(d[k]) : null));
-      [
-        'holding_class',
-        'purchase_date',
-        'purchase_value',
-        'invoice_reference',
-        'warranty_start_date',
-        'warranty_end_date',
-      ].forEach((k) => (d[k] = d[k] || null));
-      d.pm_required = fd.has('pm_required');
-      d.service_contact_ids = fd.getAll('service_contact_ids').map(Number);
-      const photo = fd.get('primary_photo'),
-        warranty = fd.get('warranty_document');
-      d.primary_photo_path = photo?.name
-        ? (await upload(photo)).path
-        : a.photo_url?.split('/').pop() || null;
-      d.warranty_document_path = warranty?.name
-        ? (await upload(warranty)).path
-        : a.warranty_document_path || null;
-      delete d.primary_photo;
-      delete d.warranty_document;
-      await api(edit ? `/assets/${a.id}` : '/assets', {
-        method: edit ? 'PUT' : 'POST',
-        body: JSON.stringify(d),
-      });
-      await assets();
-    },
-  );
-}
 const detailItem = (label, value, html = false) => {
   const present = value !== null && value !== undefined && value !== '';
   return `<div class="detail-item"><span>${esc(label)}</span><strong>${html && present ? value : esc(present ? value : 'Not recorded')}</strong></div>`;
@@ -1442,7 +1388,18 @@ function assetForm(a = {}) {
       workstationValue = workstation.value || String(a.workstation_id || '');
     refill(
       floor,
-      m.floors.filter((x) => !site || String(x.site_id) === site),
+      m.floors
+        .filter((x) => !site || String(x.site_id) === site)
+        .sort((left, right) => {
+          const order = [
+            'Basement',
+            'Ground Floor',
+            'First Floor',
+            'Second Floor',
+            'Third Floor',
+          ];
+          return order.indexOf(left.name) - order.indexOf(right.name);
+        }),
       floorValue,
     );
     refill(
