@@ -8,7 +8,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 ROOT_DIR = Path(__file__).resolve().parent
 BACKEND_DIR = ROOT_DIR / "backend"
 VENV_PYTHON = ROOT_DIR / ".venv" / "Scripts" / "python.exe"
@@ -44,6 +43,7 @@ def bootstrap() -> None:
         cwd=BACKEND_DIR,
     )
 
+
 def main() -> int:
     try:
         bootstrap()
@@ -68,12 +68,12 @@ def main() -> int:
 
     import uvicorn
 
-    url = "https://labmate.bhasinpathlabs.com:4674"
+    url = "https://labmate.bhasinpathlabs.com:4676"
     print(f"Starting DBL AssetHub at {url}")
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
-        port=4674,
+        port=4676,
         ssl_certfile=str(SSL_CERTIFICATE),
         ssl_keyfile=str(SSL_PRIVATE_KEY),
     )

@@ -6,7 +6,7 @@ A FastAPI + Jinja V1 for the full operational lifecycle of laboratory, IT, offic
 
 1. Start **MySQL** from the XAMPP Control Panel.
 2. Run `py app.py` from the project folder. On the first run it creates `.env` and `.venv`, installs dependencies, and applies database migrations automatically.
-3. Open https://labmate.bhasinpathlabs.com:4674. API documentation is at https://labmate.bhasinpathlabs.com:4674/docs.
+3. Open https://labmate.bhasinpathlabs.com:4676. API documentation is at https://labmate.bhasinpathlabs.com:4676/docs.
 
 HTTPS uses `certs/fullchain.pem` and `certs/privkey.pem`. Certificate files are intentionally excluded from Git and must be installed separately on each server.
 
